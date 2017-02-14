@@ -38,7 +38,7 @@ class RegExpPath {
     
     
     /**
-     *
+     * Holds the information from the matched tokens
      * @var array
      */
     var $matched;
@@ -72,10 +72,19 @@ class RegExpPath {
      */
     var $strictMode;
     
+    /**
+     * A callback to be called when an exact match is found
+     * 
+     * @var callable
+     */
+    
+    var $callback;
+    
     
     public function __construct() {
         $this->states =[];
         $this->strictMode = false;
+        $this->callback = NULL;
         $this->reset();
     }
     
@@ -98,6 +107,17 @@ class RegExpPath {
     }
     
     /**
+     *  Set the path's callback
+     *  
+     * When called, $f will be passed the array of matched tokens information
+     * 
+     * @param \callable $f
+     */
+    public function setCallback(callable $f){
+        $this->callback = $f;
+    }
+    
+    /**
      * Processes one token and changes the state of
      * the path accordingly. Returns true if the given token
      * did not cause the path go in an unmatched state.
@@ -112,9 +132,13 @@ class RegExpPath {
             if ($this->strictMode && $t !== Token::NONE){
                 $this->noMatch = true;
                 $this->currentState = 0;
+                $this->matched = [];
                 return false;
             }
             else{
+                if  ($this->callback !== NULL){
+                    call_user_func($this->callback, $this->matched);
+                }
                 return true;
             }
         }
@@ -137,7 +161,11 @@ class RegExpPath {
                     if ($condition->match($t)){
                         $this->matched[] = $condition->matched($t);
                         $this->currentState = $condition->nextState;
-                        // add callback here
+                        if ($this->matchFound() && !$this->strictMode){
+                            if  ($this->callback !== NULL){
+                                call_user_func($this->callback, $this->matched);
+                            }
+                        }
                         return true;
                     }
                 }
@@ -145,7 +173,10 @@ class RegExpPath {
             }
             $advancing = $hasEmpty;
         }
+        // A no-match is confirmed
+        $this->currentState = 0;
         $this->noMatch = true;
+        $this->matched = [];
         return false;
     }
     
@@ -165,7 +196,8 @@ class RegExpPath {
                 return false;
             }
         }
-        return $this->match(Token::NONE);
+        // add an empty token to force matching in strict mode
+        return $this->match(Token::EMPTY_TOKEN);
     }
     
     public function pushStates($states){

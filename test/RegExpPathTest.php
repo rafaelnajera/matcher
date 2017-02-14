@@ -237,6 +237,35 @@ class MyRegExpTest extends \PHPUnit_Framework_TestCase{
         $this->assertEquals(false, $path->matchFound());
         $path->matchArray(['a', 'b',  'c', 'd', 'e']);
         $this->assertEquals(false, $path->matchFound());
+    }
+    
+    public function testCallback(){
+        $path = new RegExpPath();
+        $path->pushStates(StateArray::concatConditions(['a', 'b', 'c']));
+        
+        $callBackCalled = false;
+        $matchedArray = [];
+        $path->setCallback( function ($m) use (&$callBackCalled, &$matchedArray) {
+            $callBackCalled = true;
+            $matchedArray = [];
+            $matchedArray = array_merge($matchedArray, $m);
+        });
+        
+        $path->matchArray(['a', 'b', 'c', 'e']);
+        $this->assertEquals(true, $path->matchFound());
+        $this->assertEquals(true, $callBackCalled);
+        $this->assertEquals(['a', 'b', 'c'], $matchedArray);
+        
+        $callBackCalled = false;
+        $matchedArray = [];
+        $path->setStrictMode();
+        $path->matchArray(['a', 'b', 'c', 'e']);
+        $this->assertEquals(true, $path->NoMatch());
+        $this->assertEquals(false, $callBackCalled);
+        $path->matchArray(['a', 'b', 'c']);
+        $this->assertEquals(true, $path->matchFound());
+        $this->assertEquals(true, $callBackCalled);
+        $this->assertEquals(['a', 'b', 'c'], $matchedArray);
         
     }
 }
