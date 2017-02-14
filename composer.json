@@ -1,0 +1,26 @@
+{
+    "name": "rafaelnajera/matcher",
+    "type": "library",
+    "description": "A regexp like matcher for bespoke tokens.",
+    "keywords": ["regexp"],
+    "homepage": "http://rafaelnajera.com/matcher",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Rafael Nájera",
+            "email": "rafael@najera.ca",
+            "homepage": "http://rafaelnajera.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Matcher\\": "Matcher"
+        }
+    }
+}
