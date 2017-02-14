@@ -43,8 +43,14 @@ class State {
     const INIT = 0;
     const MATCH = 100000;
     
+    /**
+     * Initializes the State with a copy of the given
+     * conditions.
+     * 
+     * @param array $c
+     */
     public function __construct(array $c) {
-        // make new copies of conditions
+        // makes new copies of conditions
         // to avoid problems with conditions in 
         // different states referencing to the same 
         // instance

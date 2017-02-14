@@ -30,21 +30,59 @@ require_once 'StateArray.php';
 
 class RegExpPath {
     
+    /**
+     *
+     * @var array 
+     */
     var $states;
+    
+    
+    /**
+     *
+     * @var array
+     */
+    var $matched;
+    
+    /**
+     *
+     * @var int
+     */
     var $currentState;
+    
+    /**
+     * NoMatch flag
+     * 
+     * The flag is set when it has been determined that the path
+     * did not match the input. 
+     * 
+     * When noMatch is false, the path may or may not have been completely 
+     * matched with the input. 
+     * 
+     * 
+     * @var boolean
+     */
     var $noMatch;
+    
     /**
      * Strict mode flag
+     * 
      * In strict mode once the path is matched, any extra non-empty tokens
      * make the path be flagged as unmatched
-     * @var bool 
+     * @var boolean
      */
     var $strictMode;
+    
     
     public function __construct() {
         $this->states =[];
         $this->strictMode = false;
         $this->reset();
+    }
+    
+    public function reset(){
+        $this->noMatch = false;
+        $this->currentState = State::INIT;
+        $this->matched =  [];
     }
     
     public function NoMatch(){
@@ -54,15 +92,26 @@ class RegExpPath {
     public function setStrictMode($flag = true){
         $this->strictMode = $flag;
     }
+    
     public function matchFound(){
         return ($this->currentState===State::MATCH);
     }
     
+    /**
+     * Processes one token and changes the state of
+     * the path accordingly. Returns true if the given token
+     * did not cause the path go in an unmatched state.
+     * 
+     * @param any $t  It can be of any type, the conditions used to build
+     *                the path should know what to do with it.
+     * @return boolean
+     */
     public function match($t){
         
         if ($this->currentState===State::MATCH){
             if ($this->strictMode && $t !== Token::NONE){
                 $this->noMatch = true;
+                $this->currentState = 0;
                 return false;
             }
             else{
@@ -86,6 +135,7 @@ class RegExpPath {
                     break;
                 } else {
                     if ($condition->match($t)){
+                        $this->matched[] = $condition->matched($t);
                         $this->currentState = $condition->nextState;
                         // add callback here
                         return true;
@@ -99,7 +149,15 @@ class RegExpPath {
         return false;
     }
     
-    public function matchArray($tokens){
+    /**
+     * Tries to match an array of tokens.
+     * 
+     * This resets the internal state of the path.
+     * 
+     * @param array $tokens
+     * @return boolean
+     */
+    public function matchArray(array $tokens){
         
         $this->reset();
         foreach($tokens as $t){
@@ -107,15 +165,11 @@ class RegExpPath {
                 return false;
             }
         }
-        return $this->match('');
+        return $this->match(Token::NONE);
     }
     
     public function pushStates($states){
         $this->states = StateArray::addStates($this->states, $states);
     }
-    
-    public function reset(){
-        $this->noMatch = false;
-        $this->currentState = State::INIT;
-    }
+
 }

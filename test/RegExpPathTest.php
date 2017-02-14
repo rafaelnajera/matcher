@@ -1,22 +1,27 @@
 <?php
 
 /*
- *  Copyright (C) 2016 Universität zu Köln
- *  
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU General Public License
- *  as published by the Free Software Foundation; either version 2
- *  of the License, or (at your option) any later version.
- *   
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *  
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
- *  
+ * The MIT License
+ *
+ * Copyright 2017 Rafael Nájera <rafael.najera@uni-koeln.de>.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 
 namespace Matcher;
@@ -45,6 +50,7 @@ class MyRegExpTest extends \PHPUnit_Framework_TestCase{
         $path->match('c');
         $this->assertEquals(false, $path->NoMatch());
         $this->assertEquals(true, $path->matchFound());
+        $this->assertEquals(['a', 'b', 'c'], $path->matched);
         $path->reset();
         $path->match('a');
         $this->assertEquals(false, $path->NoMatch());
@@ -66,10 +72,21 @@ class MyRegExpTest extends \PHPUnit_Framework_TestCase{
         $path->match('c');
         $this->assertEquals(false, $path->NoMatch());
         $this->assertEquals(true, $path->matchFound());
+        $this->assertEquals(['a', 'b', 'c'], $path->matched);
+        // continue matching in non-strict mode
+        $path->match('d');
+        $this->assertEquals(false, $path->NoMatch());
+        $this->assertEquals(true, $path->matchFound());
+        $this->assertEquals(['a', 'b', 'c'], $path->matched);
+        $path->match('e');
+        $this->assertEquals(false, $path->NoMatch());
+        $this->assertEquals(true, $path->matchFound());
+        $this->assertEquals(['a', 'b', 'c'], $path->matched);
         
+        // Now in strict mode
         $path->pushStates(StateArray::concatConditions(['d', 'e']));
-        //print_r($path);
         $path->reset();
+        $path->setStrictMode();
         $path->match('a');
         $path->match('b');
         $path->match('c');
@@ -77,6 +94,18 @@ class MyRegExpTest extends \PHPUnit_Framework_TestCase{
         $path->match('e');
         $this->assertEquals(false, $path->NoMatch());
         $this->assertEquals(true, $path->matchFound());
+        $this->assertEquals(['a', 'b', 'c', 'd', 'e'], $path->matched);
+        // Matching an empty token should succeed!
+        $path->match(Token::EMPTY_TOKEN);
+        $this->assertEquals(true, $path->matchFound());
+        $this->assertEquals(['a', 'b', 'c', 'd', 'e'], $path->matched);
+        // Matching anything else should fail
+        $path->match('f');
+        $this->assertEquals(true, $path->NoMatch());
+        $this->assertEquals(false, $path->matchFound());
+        $path->match('g');
+        $this->assertEquals(true, $path->NoMatch());
+        $this->assertEquals(false, $path->matchFound());
         
         $path->reset();
         $path->match('a');
@@ -84,12 +113,26 @@ class MyRegExpTest extends \PHPUnit_Framework_TestCase{
         $this->assertEquals(true, $path->NoMatch());
         $this->assertEquals(false, $path->matchFound());
         
-        $path->reset();
+        // Array matching
+        $path->setStrictMode(false);
         $m = $path->matchArray(['a', 'b', 'c', 'd', 'e']);
         $this->assertEquals(true, $path->matchFound());
         
+        $m = $path->matchArray(['a', 'b', 'c', 'd', 'e', 'f']);
+        $this->assertEquals(true, $path->matchFound());
+        $this->assertEquals(['a', 'b', 'c', 'd', 'e'], $path->matched);
+        
         $m = $path->matchArray(['a', 'b', 'd', 'd', 'e']);
         $this->assertEquals(false, $path->matchFound());
+        
+        $path->setStrictMode();
+        $m = $path->matchArray(['a', 'b', 'c', 'd', 'e']);
+        $this->assertEquals(true, $path->matchFound());
+        
+        $m = $path->matchArray(['a', 'b', 'c', 'd', 'e', 'f']);
+        $this->assertEquals(false, $path->matchFound());
+        
+        
     }
     
     public function testZeroOrOneMatch(){
@@ -106,8 +149,11 @@ class MyRegExpTest extends \PHPUnit_Framework_TestCase{
         
         $path->matchArray(['a', 'b', 'c', 'd', 'e']);
         $this->assertEquals(true, $path->matchFound());
+        $this->assertEquals(['a', 'b', 'c', 'd', 'e'], $path->matched);
+        
         $path->matchArray(['a', 'b', 'e']);
         $this->assertEquals(true, $path->matchFound());
+        $this->assertEquals(['a', 'b', 'e'], $path->matched);
         $path->matchArray(['a', 'b', 'f']);
         $this->assertEquals(false, $path->matchFound());
         $path->matchArray(['a', 'b',  'c', 'f']);
@@ -191,7 +237,6 @@ class MyRegExpTest extends \PHPUnit_Framework_TestCase{
         $this->assertEquals(false, $path->matchFound());
         $path->matchArray(['a', 'b',  'c', 'd', 'e']);
         $this->assertEquals(false, $path->matchFound());
-        
         
     }
 }

@@ -27,12 +27,36 @@
 namespace Matcher;
 
 /**
- * Description of Token
+ * A token interface
+ * 
+ * 
  *
  * @author Rafael Nájera <rafael.najera@uni-koeln.de>
  */
 
-abstract class Token {
+interface Token {
     const NONE = '';
-    public abstract function matches($t2);
+    // an alias
+    const EMPTY_TOKEN = self::NONE;
+    
+    /**
+     * Returns true is the token matches the given variable $t2
+     * 
+     * There is no restriction on the type of $t2 as long as 
+     * the Token class know what to do with it.
+     * 
+     * @param any $t2
+     * @return boolean 
+     */
+    public function matches($t2);
+    
+    /**
+     * Returns information about the matched token. 
+     * 
+     * There is no restriction on the type of $t2 as long as 
+     * the Token class knows how to get relevant information out of it.
+     * 
+     * @param type $t2
+     */
+    public function matched($t2);
 }

@@ -25,8 +25,8 @@
  */
 namespace Matcher;
 
-
 require_once 'State.php';
+
 /**
  * An array of states
  * 

@@ -29,17 +29,22 @@ namespace Matcher;
 require_once 'Token.php';
 
 /**
- * Description of Condition
+ * Condition: a token and next state
  *
  * @author Rafael Nájera <rafael.najera@uni-koeln.de>
  */
 class Condition {
     /**
      *
-     * @var any or Token  the token
+     * @var any|Token 
      * 
      */
     var $token;
+    
+    /**
+     *
+     * @var int 
+     */
     var $nextState;
     
     
@@ -48,13 +53,20 @@ class Condition {
      * The given token can be of type Token, in which case matching will
      * be done using the method Token::matches.  In any other case
      * matching is done by strict comparison (===)
-     * @param string|Token $t
+     * @param any|Token $t
      * @param int $ns
      */
-    public function __construct($t, $ns) {
+    public function __construct($t, int $ns) {
         $this->token = $t;
         $this->nextState = $ns;
     }
+    
+    /**
+     * Returns true is the given token matches the Condition's token
+     * 
+     * @param any|Token $t
+     * @return boolean
+     */
     public function match($t){
         if ($this->token instanceof Token){
             if ($this->token->matches($t)){
@@ -69,6 +81,29 @@ class Condition {
         return false;
     }
     
+    /**
+     * Returns information about the matched token.
+     * 
+     * If the condition's token implements the Token interface
+     * the token's matched() method will be called. 
+     * If not, returns a copy of the token
+     * 
+     * @return any
+     */
+    public function matched($t){
+        if ($this->token instanceof Token){
+            return $this->token->matched($t);
+        }
+        else {
+            return $t;
+        }
+    }
+    
+    /**
+     * Returns true is the token is the empty token
+     * 
+     * @return boolean
+     */
     public function isTokenEmpty(){
         return $this->token === Token::NONE;
     }
