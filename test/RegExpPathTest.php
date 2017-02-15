@@ -249,6 +249,7 @@ class MyRegExpTest extends \PHPUnit_Framework_TestCase{
             $callBackCalled = true;
             $matchedArray = [];
             $matchedArray = array_merge($matchedArray, $m);
+            return $m;
         });
         
         $path->matchArray(['a', 'b', 'c', 'e']);
@@ -266,6 +267,22 @@ class MyRegExpTest extends \PHPUnit_Framework_TestCase{
         $this->assertEquals(true, $path->matchFound());
         $this->assertEquals(true, $callBackCalled);
         $this->assertEquals(['a', 'b', 'c'], $matchedArray);
+        $this->assertEquals(['a', 'b', 'c'], $path->matched);
         
+    }
+    
+    public function testCallBack2(){
+        $path = new RegExpPath();
+        $path->pushStates(StateArray::concatConditions(['a', 'b', 'c']));
+        
+        $path->setCallback( 
+                function ($m) {
+                    return implode($m);
+                }
+        );
+        
+        $path->matchArray(['a', 'b', 'c', 'e']);
+        $this->assertEquals(true, $path->matchFound());
+        $this->assertEquals('abc', $path->matched);
     }
 }

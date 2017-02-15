@@ -53,7 +53,7 @@ class StateArray {
             $newStates[$nStates] = new State([ new Condition($t, $nStates+1)]);
             $nStates++;
         }
-        $newStates[$nStates-1]->conditions[0]->nextState =  State::MATCH;
+        $newStates[$nStates-1]->conditions[State::INIT]->nextState =  State::MATCH;
         return $newStates;
     }
 
@@ -73,7 +73,7 @@ class StateArray {
         if (count($s2) == 0){
             return $s1;
         }
-        $s2[0]->conditions[] = new Condition('', State::MATCH);
+        $s2[State::INIT]->conditions[] = new Condition('', State::MATCH);
         
         return self::addStates($s1, $s2);
     }
@@ -108,7 +108,7 @@ class StateArray {
             }
         }
         
-        $s2[] = new State($s2[0]->conditions);
+        $s2[] = new State($s2[State::INIT]->conditions);
         
         $s2[$newState]->conditions[] = new Condition('', State::MATCH);
         

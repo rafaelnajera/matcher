@@ -80,11 +80,14 @@ class RegExpPath {
     
     var $callback;
     
+    var $callbackcalled;
+    
     
     public function __construct() {
         $this->states =[];
         $this->strictMode = false;
         $this->callback = NULL;
+        $this->callbackcalled = false;
         $this->reset();
     }
     
@@ -129,16 +132,20 @@ class RegExpPath {
     public function match($t){
         
         if ($this->currentState===State::MATCH){
-            if ($this->strictMode && $t !== Token::NONE){
-                $this->noMatch = true;
-                $this->currentState = 0;
-                $this->matched = [];
-                return false;
-            }
-            else{
-                if  ($this->callback !== NULL){
-                    call_user_func($this->callback, $this->matched);
+            if ($this->strictMode) {
+                if ($t !== Token::NONE){
+                    $this->noMatch = true;
+                    $this->currentState = 0;
+                    $this->matched = [];
+                    return false;
                 }
+                else{
+                    if ($this->callback !== NULL){
+                        $this->matched = call_user_func($this->callback, $this->matched);
+                    }
+                    return true;
+                }
+            } else {
                 return true;
             }
         }
@@ -163,7 +170,7 @@ class RegExpPath {
                         $this->currentState = $condition->nextState;
                         if ($this->matchFound() && !$this->strictMode){
                             if  ($this->callback !== NULL){
-                                call_user_func($this->callback, $this->matched);
+                                $this->matched = call_user_func($this->callback, $this->matched);
                             }
                         }
                         return true;
