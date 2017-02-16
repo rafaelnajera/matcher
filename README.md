@@ -15,7 +15,7 @@ in a regexp-like manner.
 
 The main class is Pattern, which stands for a regexp-like pattern that can be matched.
 
-The following sets up a Pattern object to match  '^ab(cd)*e':
+The following sets up a Pattern object to match  `'^ab(cd)*e'`:
 
 ```php
         $p = (new Pattern())->withTokenSeries(['a', 'b'])
@@ -24,32 +24,32 @@ The following sets up a Pattern object to match  '^ab(cd)*e':
 ```
 The tokens used to set up the pattern can be of any type. Matching is done 
 by strict comparison with the input tokens.  Tokens can also be objects
-that implement the Token interface, in which case the token's matches($someInput) 
+that implement the `Token` interface, in which case the token's `matches($someInput)` 
 method will be called. The input in this case can be anything as long as the
-matches() method knows how to determine a match.
+`matches()` method knows how to determine a match.
 
-Once set up, input tokens can be fed to the pattern one by one with the match method:
+Once set up, input tokens can be fed to the pattern one by one with the `match` method:
 
 ```php
 $r = $p->match('a');
 $r = $p->match('b');
 ...
 ```
-Here $r will be 'false' if the path does not match the input. $r will be true
+Here `$r` will be false if the input does not match the pattern. `$r` will be true
 if the sequence is still "alive", that is, if the sequence still matches the 
-pattern in $path.  When a full match is found the matchFound() method returns
+pattern in `$p`.  When a full match is found the `matchFound()` method returns
 true:
 ```php
 $m = $p->matchFound();
 ```
 
-The public variable $p->matched at this point will contain the actual sequence
-of matched tokens or, if tokens implement the Token interfaces, whatever the
-matched($someInput) method returns. This array of matched token information 
+The public variable `$p->matched` at this point will contain the actual sequence
+of matched tokens or, if tokens implement the `Token` interface, whatever the
+`matched($someInput)` method returns. This array of matched token information 
 can be manipulated during the matching process with callbacks as explained
 below.
 
-The reset() method, resets the internal state of the pattern as if no
+The `reset()` method, resets the internal state of the pattern as if no
 token had been fed to it.
 
 ```php
@@ -63,19 +63,19 @@ $r = $p->matchArray(['a', 'b', 'c']);
 ```
 
 NOTE: there might be cases in which an empty token or EOF token would need
-to be provided so that a complete match can be determined, matchArray does
-not provide and end token itself.
+to be provided so that a complete match can be determined, `matchArray` does
+not provide an end token itself.
 
 ### Callbacks
 
 A callback can be provided that will be called when a full match occurs. The 
-callback function is called with $p->matched as its only argument and
-its output will overwrite $p->matched.
+callback function is called with `$p->matched` as its only argument and
+its output will overwrite `$p->matched`.
 
-The following code, for example, will cause $p->matched to be 'abc' instead
-of the array ['a', 'b', 'c']:
+The following code, for example, will cause $p->matched to be `'abc'` instead
+of the array `['a', 'b', 'c']`:
 ```php
-$p = (new RegExpPath())->withTokenSeries(['a', 'b', 'c'])
+$p = (new Pattern())->withTokenSeries(['a', 'b', 'c'])
    ->withCallback( 
     function ($m) {
         return implode($m);
