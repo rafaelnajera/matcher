@@ -1,6 +1,6 @@
 <?php
 
-/*
+/* 
  * The MIT License
  *
  * Copyright 2017 Rafael Nájera <rafael.najera@uni-koeln.de>.
@@ -24,15 +24,23 @@
  * THE SOFTWARE.
  */
 
-namespace Matcher;
-
 /**
- * Description of Matcher
- *
- * @author Rafael Nájera <rafael.najera@uni-koeln.de>
+ * Clones an array taking care of cloning its objects and subarrays
+ * as well.
+ * 
+ * @author Andrew Larsson
+ * @link http://stackoverflow.com/questions/1532618/is-there-a-function-to-make-a-copy-of-a-php-array-to-another
+ * @param array $array
+ * @return array
  */
-class Matcher {
-    
-    const VERSION = '0.2';
-    
+function array_clone(array $array) {
+    return array_map(function($element) {
+        return ((is_array($element))
+            ? call_user_func(__FUNCTION__, $element)
+            : ((is_object($element))
+                ? clone $element
+                : $element
+            )
+        );
+    }, $array);
 }

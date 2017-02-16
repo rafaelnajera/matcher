@@ -107,4 +107,15 @@ class Condition {
     public function isTokenEmpty(){
         return $this->token === Token::NONE;
     }
+    
+    /**
+     * Clone
+     * 
+     * Makes sure that $this->token is cloned, not just copied
+     */
+    public function __clone() {
+        if (is_object($this->token)){
+            $this->token = clone $this->token;
+        }
+    }
 }

@@ -35,15 +35,16 @@ namespace Matcher;
  */
 
 interface Token {
-    const NONE = '';
-    // an alias
-    const EMPTY_TOKEN = self::NONE;
+
+    const NONE = NULL;
+    const EOF = '';
+    
     
     /**
      * Returns true is the token matches the given variable $t2
      * 
      * There is no restriction on the type of $t2 as long as 
-     * the Token class know what to do with it.
+     * the Token class knows how to match itself to it!
      * 
      * @param any $t2
      * @return boolean 

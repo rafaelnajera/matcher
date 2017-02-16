@@ -26,7 +26,9 @@
 
 namespace Matcher;
 
+require_once 'util.php';
 require_once 'Condition.php';
+
 /**
  * An internal state in the parser
  *
@@ -38,7 +40,7 @@ class State {
      *
      * @var Condition[]
      */
-    var $conditions;
+    public $conditions;
     
     const INIT = 0;
     const MATCH = 100000;
@@ -54,10 +56,14 @@ class State {
         // to avoid problems with conditions in 
         // different states referencing to the same 
         // instance
-        $this->conditions = [];
-        foreach ($c as $cond){
-            $this->conditions[] = new Condition($cond->token, $cond->nextState);
-        }
+        $this->conditions = array_clone($c);
+    }
+    
+    public function __clone() {
+        $this->conditions = array_clone($this->conditions);
     }
 
+    public function getConditions() {
+        return $this->conditions;
+    }
 }
