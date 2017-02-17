@@ -49,7 +49,7 @@ interface Token {
      * @param any $t2
      * @return boolean 
      */
-    public function matches($t2);
+    public function matches($input);
     
     /**
      * Returns information about the matched token. 
@@ -59,5 +59,5 @@ interface Token {
      * 
      * @param type $t2
      */
-    public function matched($t2);
+    public function matched($input);
 }

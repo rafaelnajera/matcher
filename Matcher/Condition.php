@@ -53,28 +53,28 @@ class Condition {
      * The given token can be of type Token, in which case matching will
      * be done using the method Token::matches.  In any other case
      * matching is done by strict comparison (===)
-     * @param any|Token $t
-     * @param int $ns
+     * @param any|Token $token
+     * @param int $nextState
      */
-    public function __construct($t, int $ns) {
-        $this->token = $t;
-        $this->nextState = $ns;
+    public function __construct($token, int $nextState) {
+        $this->token = $token;
+        $this->nextState = $nextState;
     }
     
     /**
      * Returns true is the given token matches the Condition's token
      * 
-     * @param any|Token $t
+     * @param any|Token $input
      * @return boolean
      */
-    public function match($t){
+    public function match($input){
         if ($this->token instanceof Token){
-            if ($this->token->matches($t)){
+            if ($this->token->matches($input)){
                 return true;
             }
         } 
         else {
-            if ($this->token === $t){
+            if ($this->token === $input){
                 return true;
             }
         }
@@ -90,12 +90,12 @@ class Condition {
      * 
      * @return any
      */
-    public function matched($t){
+    public function matched($input){
         if ($this->token instanceof Token){
-            return $this->token->matched($t);
+            return $this->token->matched($input);
         }
         else {
-            return $t;
+            return $input;
         }
     }
     

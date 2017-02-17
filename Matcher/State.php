@@ -49,14 +49,14 @@ class State {
      * Initializes the State with a copy of the given
      * conditions.
      * 
-     * @param array $c
+     * @param array $theConditions
      */
-    public function __construct(array $c) {
+    public function __construct(array $theConditions) {
         // makes new copies of conditions
         // to avoid problems with conditions in 
         // different states referencing to the same 
         // instance
-        $this->conditions = array_clone($c);
+        $this->conditions = array_clone($theConditions);
     }
     
     public function __clone() {

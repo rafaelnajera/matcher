@@ -27,6 +27,7 @@
 namespace Matcher;
 
 require '../Matcher/Pattern.php';
+require '../Matcher/PatternMatcher.php';
 /**
  * Description of MyRexExpTest
  *
@@ -35,67 +36,73 @@ require '../Matcher/Pattern.php';
 class MyRegExpTest extends \PHPUnit_Framework_TestCase{
    
     public function testConcatConditions(){
-        $path = (new Pattern())->withTokenSeries(['a', 'b', 'c']);
+        $pattern = (new Pattern())->withTokenSeries(['a', 'b', 'c']);
         
-        $path->match('a');
-        $this->assertEquals(false, $path->noMatch());
-        $path->match('b');
-        $this->assertEquals(false, $path->noMatch());
-        $path->match('c');
-        $this->assertEquals(false, $path->noMatch());
-        $this->assertEquals(true, $path->matchFound());
-        $this->assertEquals(['a', 'b', 'c'], $path->matched);
-        $path->match('d');
-        $this->assertEquals(false, $path->noMatch());
-        $this->assertEquals(true, $path->matchFound());
-        $this->assertEquals(['a', 'b', 'c'], $path->matched);
-        $path->match('e');
-        $this->assertEquals(false, $path->noMatch());
-        $this->assertEquals(true, $path->matchFound());
-        $this->assertEquals(['a', 'b', 'c'], $path->matched);
+        $matcher = new PatternMatcher($pattern);
+        
+        $matcher->match('a');
+        $this->assertEquals(false, $matcher->noMatch());
+        $matcher->match('b');
+        $this->assertEquals(false, $matcher->noMatch());
+        $matcher->match('c');
+        $this->assertEquals(false, $matcher->noMatch());
+        $this->assertEquals(true, $matcher->matchFound());
+        $this->assertEquals(['a', 'b', 'c'], $matcher->matched);
+        $matcher->match('d');
+        $this->assertEquals(false, $matcher->noMatch());
+        $this->assertEquals(true, $matcher->matchFound());
+        $this->assertEquals(['a', 'b', 'c'], $matcher->matched);
+        $matcher->match('e');
+        $this->assertEquals(false, $matcher->noMatch());
+        $this->assertEquals(true, $matcher->matchFound());
+        $this->assertEquals(['a', 'b', 'c'], $matcher->matched);
         
         // Array matching
-        $m = $path->matchArray(['a', 'b', 'c', 'd', 'e']);
-        $this->assertEquals(true, $path->matchFound());
+        $matcher->matchArray(['a', 'b', 'c', 'd', 'e']);
+        $this->assertEquals(true, $matcher->matchFound());
         
-        $m = $path->matchArray(['a', 'b', 'c', 'd', 'e', 'f']);
-        $this->assertEquals(true, $path->matchFound());
-        $this->assertEquals(['a', 'b', 'c'], $path->matched);
+        $matcher->matchArray(['a', 'b', 'c', 'd', 'e', 'f']);
+        $this->assertEquals(true, $matcher->matchFound());
+        $this->assertEquals(['a', 'b', 'c'], $matcher->matched);
         
-        $m = $path->matchArray(['a', 'b', 'd', 'd', 'e']);
-        $this->assertEquals(false, $path->matchFound());
+        $matcher->matchArray(['a', 'b', 'd', 'd', 'e']);
+        $this->assertEquals(false, $matcher->matchFound());
         
     }
     
     public function testAlternativesMatch(){
-        $path = (new Pattern())
+        $pattern = (new Pattern())
                 ->withTokenSeries(['a', 'b'])
                 ->withTokenAlternatives(['c', 'd'])
                 ->withTokenSeries(['e']);
         
-        $path->matchArray(['a', 'b', 'c', 'e']);
-        $this->assertEquals(true, $path->matchFound());
-        $path->matchArray(['a', 'b', 'd',  'e']);
-        $this->assertEquals(true, $path->matchFound());
-        $path->matchArray(['a', 'b', 'e']);
-        $this->assertEquals(false, $path->matchFound());
-        $path->matchArray(['a', 'b', 'f']);
-        $this->assertEquals(false, $path->matchFound());
-        $path->matchArray(['a', 'b',  'c', 'd', 'e']);
-        $this->assertEquals(false, $path->matchFound());
+        $matcher = new PatternMatcher($pattern);
+        
+        $matcher->matchArray(['a', 'b', 'c', 'e']);
+        $this->assertEquals(true, $matcher->matchFound());
+        $matcher->matchArray(['a', 'b', 'd',  'e']);
+        $this->assertEquals(true, $matcher->matchFound());
+        $matcher->matchArray(['a', 'b', 'e']);
+        $this->assertEquals(false, $matcher->matchFound());
+        $matcher->matchArray(['a', 'b', 'f']);
+        $this->assertEquals(false, $matcher->matchFound());
+        $matcher->matchArray(['a', 'b',  'c', 'd', 'e']);
+        $this->assertEquals(false, $matcher->matchFound());
     }
     
     public function testCallback(){
         $callBackCalled = false;
         $matchedArray = [];
-        $cb = function ($m) use (&$callBackCalled, &$matchedArray) {
+        $callback = function ($matched) use (&$callBackCalled, &$matchedArray) {
                 $callBackCalled = true;
                 $matchedArray = [];
-                $matchedArray = array_merge($matchedArray, $m);
-                return $m;
+                $matchedArray = array_merge($matchedArray, $matched);
+                return $matched;
             };
-        $path = (new Pattern())->withTokenSeries(['a', 'b', 'c'])
-                ->withCallback($cb);
+        $pattern = (new Pattern())->withTokenSeries(['a', 'b', 'c'])
+                ->withCallback($callback);
+        
+        $path = new PatternMatcher($pattern);
         
         $path->matchArray(['a', 'b', 'c', 'e']);
         $this->assertEquals(true, $path->matchFound());
@@ -105,15 +112,16 @@ class MyRegExpTest extends \PHPUnit_Framework_TestCase{
     }
     
     public function testCallBack2(){
-        $path = (new Pattern())->withTokenSeries(['a', 'b', 'c'])
+        $pattern = (new Pattern())->withTokenSeries(['a', 'b', 'c'])
                     ->withCallback( 
                         function ($m) {
                             return [implode($m)];
                         });
         
-        $path->matchArray(['a', 'b', 'c', 'e']);
-        $this->assertEquals(true, $path->matchFound());
-        $this->assertEquals(['abc'], $path->matched);
+        $matcher = new PatternMatcher($pattern);
+        $matcher->matchArray(['a', 'b', 'c', 'e']);
+        $this->assertEquals(true, $matcher->matchFound());
+        $this->assertEquals(['abc'], $matcher->matched);
     }
     
     public function testAddPattern(){
@@ -132,14 +140,15 @@ class MyRegExpTest extends \PHPUnit_Framework_TestCase{
                             array_pop($m);
                             array_push($m, 'Got de');
                             return $m;});
-        $path = $abcPattern
+        $pattern = $abcPattern
                 ->withAddedPattern($dePattern)
                 ->withAddedPattern($abcPattern);
         
+        $matcher = new PatternMatcher($pattern);
         
-        $path->matchArray(['a', 'b', 'c', 'd', 'e', 'a', 'b', 'c']);
-        $this->assertEquals(true, $path->matchFound());
-        $this->assertEquals(['Got abc', 'Got de', 'Got abc'], $path->matched);
+        $matcher->matchArray(['a', 'b', 'c', 'd', 'e', 'a', 'b', 'c']);
+        $this->assertEquals(true, $matcher->matchFound());
+        $this->assertEquals(['Got abc', 'Got de', 'Got abc'], $matcher->matched);
     }
     
     public function testAddedPatternZeroOrMore(){
@@ -151,21 +160,22 @@ class MyRegExpTest extends \PHPUnit_Framework_TestCase{
                             return $m;
                 });
         
-        $p = (new Pattern())->withTokenSeries(['a', 'b'])
+        $pattern = (new Pattern())->withTokenSeries(['a', 'b'])
                 ->withAddedPatternZeroOrMore($subP)
                 ->withTokenSeries(['e']);
 
-        $p->matchArray(['a', 'b', 'e']);
-        $this->assertEquals(true, $p->matchFound());
-        $this->assertEquals(['a', 'b', 'e'], $p->matched);
+        $matcher = new PatternMatcher($pattern);
+        $matcher->matchArray(['a', 'b', 'e']);
+        $this->assertEquals(true, $matcher->matchFound());
+        $this->assertEquals(['a', 'b', 'e'], $matcher->matched);
         
-        $p->matchArray(['a', 'b', 'c', 'd', 'e']);
-        $this->assertEquals(true, $p->matchFound());
-        $this->assertEquals(['a', 'b', 'cd', 'e'], $p->matched);
+        $matcher->matchArray(['a', 'b', 'c', 'd', 'e']);
+        $this->assertEquals(true, $matcher->matchFound());
+        $this->assertEquals(['a', 'b', 'cd', 'e'], $matcher->matched);
         
-        $p->matchArray(['a', 'b', 'c', 'd', 'c', 'd', 'e']);
-        $this->assertEquals(true, $p->matchFound());
-        $this->assertEquals(['a', 'b', 'cd', 'cd', 'e'], $p->matched);
+        $matcher->matchArray(['a', 'b', 'c', 'd', 'c', 'd', 'e']);
+        $this->assertEquals(true, $matcher->matchFound());
+        $this->assertEquals(['a', 'b', 'cd', 'cd', 'e'], $matcher->matched);
     }
     
     public function testZeroOrOneMatch(){
@@ -177,25 +187,25 @@ class MyRegExpTest extends \PHPUnit_Framework_TestCase{
                             array_push($m, 'cd');
                             return $m;
                 });
-        $path = (new Pattern())
+        $pattern = (new Pattern())
                   ->withTokenSeries(['a', 'b'])
                   ->withAddedPatternZeroOrOne($subP)
                   ->withTokenSeries(['e']);
 
+        $matcher = new PatternMatcher($pattern);
+        $matcher->matchArray(['a', 'b', 'c', 'd', 'e']);
+        $this->assertEquals(true, $matcher->matchFound());
+        $this->assertEquals(['a', 'b', 'cd', 'e'], $matcher->matched);
         
-        $path->matchArray(['a', 'b', 'c', 'd', 'e']);
-        $this->assertEquals(true, $path->matchFound());
-        $this->assertEquals(['a', 'b', 'cd', 'e'], $path->matched);
-        
-        $path->matchArray(['a', 'b', 'e']);
-        $this->assertEquals(true, $path->matchFound());
-        $this->assertEquals(['a', 'b', 'e'], $path->matched);
-        $path->matchArray(['a', 'b', 'f']);
-        $this->assertEquals(false, $path->matchFound());
-        $path->matchArray(['a', 'b',  'c', 'f']);
-        $this->assertEquals(false, $path->matchFound());
-        $path->matchArray(['a', 'b',  'c', 'd', 'c', 'd', 'f']);
-        $this->assertEquals(false, $path->matchFound());
+        $matcher->matchArray(['a', 'b', 'e']);
+        $this->assertEquals(true, $matcher->matchFound());
+        $this->assertEquals(['a', 'b', 'e'], $matcher->matched);
+        $matcher->matchArray(['a', 'b', 'f']);
+        $this->assertEquals(false, $matcher->matchFound());
+        $matcher->matchArray(['a', 'b',  'c', 'f']);
+        $this->assertEquals(false, $matcher->matchFound());
+        $matcher->matchArray(['a', 'b',  'c', 'd', 'c', 'd', 'f']);
+        $this->assertEquals(false, $matcher->matchFound());
     }
     
     public function testOneOrMoreMatch(){
@@ -208,44 +218,53 @@ class MyRegExpTest extends \PHPUnit_Framework_TestCase{
                             return $m;
                 });
                 
-        $path = (new Pattern())->withTokenSeries(['a', 'b'])
+        $pattern = (new Pattern())->withTokenSeries(['a', 'b'])
                 ->withAddedPatternOneOrMore($subP)
                 ->withTokenSeries(['e']);
 
-//        print "\nFull path states:\n";
-//        print_r($path->states);
-//        
-//        print "\nFull path callbacks : \n";
-//        printArrayOfArrays($path->callbacks);
-//        
-        
-        $path->matchArray(['a', 'b', 'c', 'd', 'e']);
-        $this->assertEquals(true, $path->matchFound());
-        $this->assertEquals(['a', 'b', 'cd', 'e'], $path->matched);
+        $matcher = new PatternMatcher($pattern);
+        $matcher->matchArray(['a', 'b', 'c', 'd', 'e']);
+        $this->assertEquals(true, $matcher->matchFound());
+        $this->assertEquals(['a', 'b', 'cd', 'e'], $matcher->matched);
 
-        $path->matchArray(['a', 'b', 'c', 'd', 'c', 'd', 'e']);
-        $this->assertEquals(true, $path->matchFound());
-        $this->assertEquals(['a', 'b', 'cd', 'cd', 'e'], $path->matched);
+        $matcher->matchArray(['a', 'b', 'c', 'd', 'c', 'd', 'e']);
+        $this->assertEquals(true, $matcher->matchFound());
+        $this->assertEquals(['a', 'b', 'cd', 'cd', 'e'], $matcher->matched);
         
-        $path->matchArray(['a', 'b', 'c', 'd', 'c', 'd', 'c', 'd', 'e']);
-        $this->assertEquals(true, $path->matchFound());
-        $this->assertEquals(['a', 'b', 'cd', 'cd', 'cd', 'e'], $path->matched);
+        $matcher->matchArray(['a', 'b', 'c', 'd', 'c', 'd', 'c', 'd', 'e']);
+        $this->assertEquals(true, $matcher->matchFound());
+        $this->assertEquals(['a', 'b', 'cd', 'cd', 'cd', 'e'], $matcher->matched);
         
-        $path->matchArray(['a', 'b', 'e']);
-        $this->assertEquals(false, $path->matchFound());
-        $path->matchArray(['a', 'b', 'f']);
-        $this->assertEquals(false, $path->matchFound());
-        $path->matchArray(['a', 'b',  'c', 'd', 'c']);
-        $this->assertEquals(false, $path->matchFound());
+        $matcher->matchArray(['a', 'b', 'e']);
+        $this->assertEquals(false, $matcher->matchFound());
+        $matcher->matchArray(['a', 'b', 'f']);
+        $this->assertEquals(false, $matcher->matchFound());
+        $matcher->matchArray(['a', 'b',  'c', 'd', 'c']);
+        $this->assertEquals(false, $matcher->matchFound());
      
+    }
+    
+    public function testEOF(){
+        $pattern = (new Pattern())->withTokenSeries(['a', 'b', Token::EOF]);
+        
+        $matcher = new PatternMatcher($pattern);
+        
+        $matcher->matchArray(['a', 'b']);
+        $this->assertEquals(false, $matcher->matchFound());
+        
+        $matcher->matchArray(['a', 'b', Token::EOF]);
+        $this->assertEquals(true, $matcher->matchFound());
     }
 }
 
-function printArrayOfArrays($a){
-    print count($a) . " element(s):\n";
-    foreach ($a as $ka => $b){
-        foreach ($b as $kb => $x){
-            print " $ka, $kb\n";
+
+
+
+function printArrayOfArrays($someArray){
+    print count($someArray) . " element(s):\n";
+    foreach ($someArray as $keyOuterArray => $innerArray){
+        foreach (array_keys($innerArray) as $keyInnerArray){
+            print " $keyOuterArray, $keyInnerArray\n";
         }
     }
 }

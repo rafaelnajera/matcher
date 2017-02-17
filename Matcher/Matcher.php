@@ -33,6 +33,6 @@ namespace Matcher;
  */
 class Matcher {
     
-    const VERSION = '0.2';
+    const VERSION = '0.3';
     
 }
