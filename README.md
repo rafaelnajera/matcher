@@ -4,16 +4,18 @@ Matcher implements a regexp-like matching system that can be used with user-devi
 tokens
 
 ## Installation 
-It is recommended that you use [Composer](https://getcomposer.org/) to install Matcher.
+Install the latest version with
 
-Matcher requires PHP 7.0 or above to run and PHPUnit 5.0 for development.
+```bash
+$ composer require rafaelnajera/matcher
+```
 
 ## Usage
 
-The basic matcher class is PatternMatcher, which allows you to match a sequence 
+The main class is Matcher, which allows you to match a sequence 
 of tokens against a pattern specified in a regexp-like manner. 
 
-PatternMatcher works on a Pattern object, which stands for a regexp-like pattern 
+Matcher works on a Pattern object, which stands for a regexp-like pattern 
 that can be matched.
 
 The following sets up a Pattern object to match  `'^ab(cd)*e'`:
@@ -29,11 +31,11 @@ that implement the `Token` interface, in which case the token's `matches($someIn
 method will be called. The input in this case can be anything as long as the token's
 `matches()` method knows how to determine a match.
 
-Once set up, a PatternMathcher object can be created and  input tokens 
+Once set up, a Matcher object can be created and input tokens 
 can be fed to the it one by one with the `match` method:
 
 ```php
-$matcher = new PatternMatcher($pattern);
+$matcher = new Matcher($pattern);
 $r = $matcher->match('a');
 $r = $matcher->match('b');
 ...
@@ -87,7 +89,7 @@ $pattern = (new Pattern())->withTokenSeries(['a', 'b', 'c'])
     }
 );
 
-$matcher = new PatternMatcher($pattern);
+$matcher = new Matcher($pattern);
 $matcher->matchArray(['a', 'b', 'c', 'e']);
 
 $matcher->matchFound();  // true
@@ -105,7 +107,7 @@ $pattern = (new Pattern())->withTokenSeries(['a', 'b'])
         ->withAddedPatternZeroOrMore($subPattern)
         ->withTokenSeries(['e']);
 
-$matcher = new PatternMatcher($pattern);
+$matcher = new Matcher($pattern);
 ```
 
 In this case, every time the 'cd' subpattern is matched, the callback will be
@@ -118,7 +120,7 @@ to set up patterns and also to signal the matcher the end of the input.
 ```php
 $pattern = (new Pattern())->withTokenSeries(['a', 'b', Token::EOF]);
         
-$matcher = new PatternMatcher($pattern);
+$matcher = new Matcher($pattern);
         
 $matcher->matchArray(['a', 'b']);  // no match
 $matcher->matchArray(['a', 'b', Token::EOF]); // match found!

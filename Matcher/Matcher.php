@@ -26,13 +26,146 @@
 
 namespace Matcher;
 
+require_once 'Pattern.php';
+
 /**
- * Description of Matcher
+ * Matches a series of input token against a Pattern
  *
  * @author Rafael Nájera <rafael.najera@uni-koeln.de>
  */
 class Matcher {
     
-    const VERSION = '0.3';
+    const VERSION = '0.4';
+    /**
+     *
+     * @var int
+     */
+    private $currentState;
     
+    
+    private $states;
+    private $callbacks;
+    
+    /**
+     * NoMatch flag
+     * 
+     * The flag is set when it has been determined that the pattern
+     * did not match the input. 
+     * 
+     * When noMatch is false, the pattern may or may not have been completely 
+     * matched with the input. 
+     * 
+     * 
+     * @var boolean
+     */
+    private $noMatch;
+    
+     
+    /**
+     * Holds the information from the matched tokens
+     * @var array
+     */
+    var $matched;
+    
+    
+    public function __construct(Pattern $pattern) {
+        $this->states = $pattern->getStates();
+        $this->callbacks = $pattern->getCallbacks();
+        $this->reset();
+    }
+    
+    public function reset(){
+        $this->noMatch = false;
+        $this->currentState = State::INIT;
+        $this->matched =  [];
+    }
+    
+    public function noMatch(){
+        return $this->noMatch;
+    }
+    
+    public function matchFound(){
+        return ($this->currentState===State::MATCH);
+    }
+    
+    /**
+     * Processes one input token and changes the state of
+     * the pattern accordingly. Returns true if the given input
+     * did not cause the pattern go in an unmatched state.
+     * 
+     * @param any $input  It can be of any type, the conditions used to build
+     *                the pattern should know what to do with it.
+     * @return boolean
+     */
+    public function match($input){
+        if ($this->currentState===State::MATCH){
+            return true;
+        }
+        if ($this->noMatch){
+            return false;
+        }
+        $advancing = true;
+        
+        while ($advancing){
+            $hasEmpty = false;
+            foreach ($this->states[$this->currentState]->conditions as $condition){
+                if ($condition->isTokenEmpty()){
+                    // Move on to next state and check again
+                    $this->callCallbacks($this->currentState, $condition->nextState);
+                    $this->currentState = $condition->nextState;
+                    
+                    $hasEmpty = true;
+                    break;
+                } else {
+                    if ($condition->match($input)){
+                        $this->matched[] = $condition->matched($input);
+                        $this->callCallbacks($this->currentState, $condition->nextState);
+                        $this->currentState = $condition->nextState;
+                        return true;
+                    }
+                }
+                
+            }
+            $advancing = $hasEmpty;
+        }
+        // A no-match is confirmed
+        $this->currentState = 0;
+        $this->noMatch = true;
+        $this->matched = [];
+        return false;
+    }
+    
+    /**
+     * Tries to match an array of tokens.
+     * 
+     * Calls the match() method for every element of the given 
+     * array. 
+     * 
+     * @param array $tokens
+     * @param boolean $reset If true, reset the matcher before starting to match
+     * @return boolean
+     */
+    public function matchArray(array $tokens, $reset = true){
+        if ($reset){
+            $this->reset();
+        }
+        foreach($tokens as $t){
+            if (!$this->match($t)){
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * Calls callbacks for the given state number
+     * 
+     * @param int $stateNumber
+     */
+    private function callCallbacks(int $initialState, int $endState){
+        if (isset($this->callbacks[$initialState][$endState]) && 
+                is_callable($this->callbacks[$initialState][$endState])){
+            $this->matched = call_user_func($this->callbacks[$initialState][$endState], $this->matched);
+        }
+    }
 }
