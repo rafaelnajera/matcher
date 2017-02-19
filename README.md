@@ -126,3 +126,42 @@ $matcher->matchArray(['a', 'b']);  // no match
 $matcher->matchArray(['a', 'b', Token::EOF]); // match found!
 ```
 
+### Parallel Matching
+
+The class ```ParallelMatcher``` matches input tokens against a set
+of patterns. Once a match is found in one of the patterns, the matcher 
+saves that pattern's match sequence and starts matching again. This effectively
+considers a valid input stream as a sequence of matched patterns.
+
+The constructor simply takes an array of ```Pattern``` objects. Then the ```match()```
+method can be called on input tokens as with the ```Matcher``` class.
+
+Example:
+```php
+$pmatcher = new ParallelMatcher(
+    [
+        (new Pattern())->withTokenSeries(['(', 'a', ')']),
+        (new Pattern())->withTokenSeries(['(', 'b', ')']),
+        (new Pattern())->withTokenSeries(['(', 'c', ')'])
+    ]
+);
+
+$r = $pmatcher->match('('); // false if the input token does not match any pattern
+...
+```
+
+The method ```matchArray()``` can be used to match an array of tokens 
+against the patterns. It returns true if the input sequence was matched 
+perfectly and false if there was any error. The number of matched patterns
+can be found with ```numMatches()```
+
+Example:
+```php 
+$result = $pmatcher->matchArray(['(', 'c', ')', '(', 'c', ')']); // true
+$pmatcher->numMatches();  // 2
+
+$result = $pmatcher->matchArray(['(', 'a', ')', '(', 'x', ')']); // false
+$pmatcher->numMatches();  // 1
+
+
+```
