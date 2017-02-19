@@ -141,14 +141,13 @@ class Matcher
 
                     $hasEmpty = true;
                     break;
-                } else {
-                    if ($condition->match($input)) {
-                        $this->matched[] = $condition->matched($input);
-                        $this->actualMatched[] = $condition->matched($input);
-                        $this->callCallbacks($this->currentState, $condition->nextState);
-                        $this->currentState = $condition->nextState;
-                        return true;
-                    }
+                }
+                if ($condition->match($input)) {
+                    $this->matched[] = $condition->matched($input);
+                    $this->actualMatched[] = $condition->matched($input);
+                    $this->callCallbacks($this->currentState, $condition->nextState);
+                    $this->currentState = $condition->nextState;
+                    return true;
                 }
             }
             $advancing = $hasEmpty;

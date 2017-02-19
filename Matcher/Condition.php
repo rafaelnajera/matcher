@@ -73,10 +73,11 @@ class Condition
             if ($this->token->matches($input)) {
                 return true;
             }
-        } else {
-            if ($this->token === $input) {
-                return true;
-            }
+            return false;
+        }
+        
+        if ($this->token === $input) {
+            return true;
         }
         return false;
     }
@@ -94,9 +95,9 @@ class Condition
     {
         if ($this->token instanceof Token) {
             return $this->token->matched($input);
-        } else {
-            return $input;
         }
+        
+        return $input;
     }
 
     /**
