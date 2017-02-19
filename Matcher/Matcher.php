@@ -26,14 +26,13 @@
 
 namespace Matcher;
 
-require_once '../vendor/autoload.php';
-
 /**
  * Matches a series of input token against a Pattern
  *
  * @author Rafael Nájera <rafael.najera@uni-koeln.de>
  */
-class Matcher {
+class Matcher
+{
 
     const VERSION = '0.5';
 
@@ -87,13 +86,15 @@ class Matcher {
      */
     public $error;
 
-    public function __construct(Pattern $pattern) {
+    public function __construct(Pattern $pattern)
+    {
         $this->states = $pattern->getStates();
         $this->callbacks = $pattern->getCallbacks();
         $this->reset();
     }
 
-    public function reset(){
+    public function reset()
+    {
         $this->noMatch = false;
         $this->currentState = State::INIT;
         $this->matched =  [];
@@ -101,11 +102,13 @@ class Matcher {
         $this->error = self::E_NOERROR;
     }
 
-    public function noMatch(){
+    public function noMatch()
+    {
         return $this->noMatch;
     }
 
-    public function matchFound(){
+    public function matchFound()
+    {
         return ($this->currentState===State::MATCH_FOUND);
     }
 
@@ -118,19 +121,20 @@ class Matcher {
      *                the pattern should know what to do with it.
      * @return boolean
      */
-    public function match($input){
-        if ($this->currentState===State::MATCH_FOUND){
+    public function match($input)
+    {
+        if ($this->currentState===State::MATCH_FOUND) {
             return true;
         }
-        if ($this->noMatch){
+        if ($this->noMatch) {
             return false;
         }
         $advancing = true;
 
-        while ($advancing){
+        while ($advancing) {
             $hasEmpty = false;
-            foreach ($this->states[$this->currentState]->conditions as $condition){
-                if ($condition->isTokenEmpty()){
+            foreach ($this->states[$this->currentState]->conditions as $condition) {
+                if ($condition->isTokenEmpty()) {
                     // Move on to next state and check again
                     $this->callCallbacks($this->currentState, $condition->nextState);
                     $this->currentState = $condition->nextState;
@@ -138,7 +142,7 @@ class Matcher {
                     $hasEmpty = true;
                     break;
                 } else {
-                    if ($condition->match($input)){
+                    if ($condition->match($input)) {
                         $this->matched[] = $condition->matched($input);
                         $this->actualMatched[] = $condition->matched($input);
                         $this->callCallbacks($this->currentState, $condition->nextState);
@@ -146,7 +150,6 @@ class Matcher {
                         return true;
                     }
                 }
-
             }
             $advancing = $hasEmpty;
         }
@@ -167,12 +170,13 @@ class Matcher {
      * @param boolean $reset If true, reset the matcher before starting to match
      * @return boolean
      */
-    public function matchArray(array $tokens, $reset = true){
-        if ($reset){
+    public function matchArray(array $tokens, $reset = true)
+    {
+        if ($reset) {
             $this->reset();
         }
-        foreach($tokens as $t){
-            if (!$this->match($t)){
+        foreach ($tokens as $t) {
+            if (!$this->match($t)) {
                 return false;
             }
         }
@@ -184,11 +188,11 @@ class Matcher {
      *
      * @param int $stateNumber
      */
-    private function callCallbacks(int $initialState, int $endState){
+    private function callCallbacks(int $initialState, int $endState)
+    {
         if (isset($this->callbacks[$initialState][$endState]) &&
-                is_callable($this->callbacks[$initialState][$endState])){
+                is_callable($this->callbacks[$initialState][$endState])) {
             $this->matched = call_user_func($this->callbacks[$initialState][$endState], $this->matched);
         }
     }
-
 }

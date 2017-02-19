@@ -26,26 +26,25 @@
 
 namespace Matcher;
 
-require_once '../vendor/autoload.php';
-
 /**
  * Condition: a token and next state
  *
  * @author Rafael Nájera <rafael.najera@uni-koeln.de>
  */
-class Condition {
+class Condition
+{
     /**
      *
      * @var any|Token
      *
      */
-    var $token;
+    public $token;
 
     /**
      *
      * @var int
      */
-    var $nextState;
+    public $nextState;
 
 
     /**
@@ -56,7 +55,8 @@ class Condition {
      * @param any|Token $token
      * @param int $nextState
      */
-    public function __construct($token, int $nextState) {
+    public function __construct($token, int $nextState)
+    {
         $this->token = $token;
         $this->nextState = $nextState;
     }
@@ -67,14 +67,14 @@ class Condition {
      * @param any|Token $input
      * @return boolean
      */
-    public function match($input){
-        if ($this->token instanceof Token){
-            if ($this->token->matches($input)){
+    public function match($input)
+    {
+        if ($this->token instanceof Token) {
+            if ($this->token->matches($input)) {
                 return true;
             }
-        }
-        else {
-            if ($this->token === $input){
+        } else {
+            if ($this->token === $input) {
                 return true;
             }
         }
@@ -90,11 +90,11 @@ class Condition {
      *
      * @return any
      */
-    public function matched($input){
-        if ($this->token instanceof Token){
+    public function matched($input)
+    {
+        if ($this->token instanceof Token) {
             return $this->token->matched($input);
-        }
-        else {
+        } else {
             return $input;
         }
     }
@@ -104,7 +104,8 @@ class Condition {
      *
      * @return boolean
      */
-    public function isTokenEmpty(){
+    public function isTokenEmpty()
+    {
         return $this->token === Token::NONE;
     }
 
@@ -113,13 +114,15 @@ class Condition {
      *
      * Makes sure that $this->token is cloned, not just copied
      */
-    public function __clone() {
-        if (is_object($this->token)){
+    public function __clone()
+    {
+        if (is_object($this->token)) {
             $this->token = clone $this->token;
         }
     }
 
-    public function __toString() {
+    public function __toString()
+    {
         return (string) $this->token;
     }
 }

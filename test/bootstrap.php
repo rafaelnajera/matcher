@@ -1,9 +1,9 @@
 <?php
 
-/*
+/* 
  * The MIT License
  *
- * Copyright 2017 Rafael Nájera <rafael.najera@uni-koeln.de>.
+ * Copyright 2017 Rafael Nájera.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,48 +24,4 @@
  * THE SOFTWARE.
  */
 
-namespace Matcher;
-
-/**
- * An internal state in the parser
- *
- * @author Rafael Nájera <rafael.najera@uni-koeln.de>
- */
-class State
-{
-
-    /**
-     *
-     * @var Condition[]
-     */
-    public $conditions;
-
-    const INIT = 0;
-    const MATCH_FOUND = 1000111;
-    const NO_MATCH = 1000222;
-
-    /**
-     * Initializes the State with a copy of the given
-     * conditions.
-     *
-     * @param array $theConditions
-     */
-    public function __construct(array $theConditions)
-    {
-        // makes new copies of conditions
-        // to avoid problems with conditions in
-        // different states referencing to the same
-        // instance
-        $this->conditions = Utilities::arrayClone($theConditions);
-    }
-
-    public function __clone()
-    {
-        $this->conditions = Utilities::arrayClone($this->conditions);
-    }
-
-    public function getConditions()
-    {
-        return $this->conditions;
-    }
-}
+require_once '../vendor/autoload.php';

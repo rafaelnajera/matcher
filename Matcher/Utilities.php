@@ -28,27 +28,27 @@
 
 namespace Matcher;
 
-
-class Utilities {
-/**
- * Clones an array taking care of cloning its objects and subarrays
- * as well.
- *
- * @author Andrew Larsson
- * @link http://stackoverflow.com/questions/1532618/is-there-a-function-to-make-a-copy-of-a-php-array-to-another
- * @param array $array
- * @return array
- */
-public static function array_clone(array $array) {
-    return array_map(function($element) {
-        return ((is_array($element))
-            ? call_user_func(__FUNCTION__, $element)
-            : ((is_object($element))
-                ? clone $element
-                : $element
-            )
-        );
-    }, $array);
-}
-
+class Utilities
+{
+    /**
+     * Clones an array taking care of cloning its objects and subarrays
+     * as well.
+     *
+     * @author Andrew Larsson
+     * @link http://stackoverflow.com/questions/1532618/is-there-a-function-to-make-a-copy-of-a-php-array-to-another
+     * @param array $array
+     * @return array
+     */
+    public static function arrayClone(array $array)
+    {
+        return array_map(function ($element) {
+                return ((is_array($element))
+                    ? call_user_func(__FUNCTION__, $element)
+                    : ((is_object($element))
+                        ? clone $element
+                        : $element
+                    )
+                );
+        }, $array);
+    }
 }

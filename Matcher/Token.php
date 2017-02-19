@@ -28,45 +28,44 @@ namespace Matcher;
 
 /**
  * A token interface
- * 
- * 
  *
  * @author Rafael Nájera <rafael.najera@uni-koeln.de>
  */
 
-interface Token {
+interface Token
+{
 
-    const NONE = NULL;
+    const NONE = null;
     const EOF = '';
     
     
     /**
      * Returns true is the token matches the given variable $t2
-     * 
-     * There is no restriction on the type of $t2 as long as 
+     *
+     * There is no restriction on the type of $t2 as long as
      * the Token class knows how to match itself to it!
-     * 
+     *
      * @param any $input
-     * @return boolean 
+     * @return boolean
      */
     public function matches($input);
     
     /**
-     * Returns information about the matched token. 
-     * 
-     * There is no restriction on the type of $t2 as long as 
+     * Returns information about the matched token.
+     *
+     * There is no restriction on the type of $t2 as long as
      * the Token class knows how to get relevant information out of it.
-     * 
+     *
      * @param type $input
      */
     public function matched($input);
     
     /**
      * Generates a string that represents the input
-     * 
+     *
      * Used to generate error and warning messages when a match
      * is not found
-     * 
+     *
      * @param any $input
      */
     public function inputToString($input);
