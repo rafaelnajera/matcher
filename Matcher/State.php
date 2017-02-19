@@ -26,8 +26,7 @@
 
 namespace Matcher;
 
-require_once 'util.php';
-require_once 'Condition.php';
+require_once '../vendor/autoload.php';
 
 /**
  * An internal state in the parser
@@ -35,32 +34,34 @@ require_once 'Condition.php';
  * @author Rafael Nájera <rafael.najera@uni-koeln.de>
  */
 class State {
-    
+
     /**
      *
      * @var Condition[]
      */
     public $conditions;
-    
+
     const INIT = 0;
-    const MATCH = 100000;
-    
+    const MATCH_FOUND = 1000111;
+    const NO_MATCH = 1000222;
+
+
     /**
      * Initializes the State with a copy of the given
      * conditions.
-     * 
+     *
      * @param array $theConditions
      */
     public function __construct(array $theConditions) {
         // makes new copies of conditions
-        // to avoid problems with conditions in 
-        // different states referencing to the same 
+        // to avoid problems with conditions in
+        // different states referencing to the same
         // instance
-        $this->conditions = array_clone($theConditions);
+        $this->conditions = Utilities::array_clone($theConditions);
     }
-    
+
     public function __clone() {
-        $this->conditions = array_clone($this->conditions);
+        $this->conditions = Utilities::array_clone($this->conditions);
     }
 
     public function getConditions() {

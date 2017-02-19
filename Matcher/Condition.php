@@ -26,7 +26,7 @@
 
 namespace Matcher;
 
-require_once 'Token.php';
+require_once '../vendor/autoload.php';
 
 /**
  * Condition: a token and next state
@@ -36,18 +36,18 @@ require_once 'Token.php';
 class Condition {
     /**
      *
-     * @var any|Token 
-     * 
+     * @var any|Token
+     *
      */
     var $token;
-    
+
     /**
      *
-     * @var int 
+     * @var int
      */
     var $nextState;
-    
-    
+
+
     /**
      * Initializes the condition with the given token and nextState
      * The given token can be of type Token, in which case matching will
@@ -60,10 +60,10 @@ class Condition {
         $this->token = $token;
         $this->nextState = $nextState;
     }
-    
+
     /**
      * Returns true is the given token matches the Condition's token
-     * 
+     *
      * @param any|Token $input
      * @return boolean
      */
@@ -72,7 +72,7 @@ class Condition {
             if ($this->token->matches($input)){
                 return true;
             }
-        } 
+        }
         else {
             if ($this->token === $input){
                 return true;
@@ -80,14 +80,14 @@ class Condition {
         }
         return false;
     }
-    
+
     /**
      * Returns information about the matched token.
-     * 
+     *
      * If the condition's token implements the Token interface
-     * the token's matched() method will be called. 
+     * the token's matched() method will be called.
      * If not, returns a copy of the token
-     * 
+     *
      * @return any
      */
     public function matched($input){
@@ -98,24 +98,28 @@ class Condition {
             return $input;
         }
     }
-    
+
     /**
      * Returns true is the token is the empty token
-     * 
+     *
      * @return boolean
      */
     public function isTokenEmpty(){
         return $this->token === Token::NONE;
     }
-    
+
     /**
      * Clone
-     * 
+     *
      * Makes sure that $this->token is cloned, not just copied
      */
     public function __clone() {
         if (is_object($this->token)){
             $this->token = clone $this->token;
         }
+    }
+
+    public function __toString() {
+        return (string) $this->token;
     }
 }
