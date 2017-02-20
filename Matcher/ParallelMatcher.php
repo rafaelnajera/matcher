@@ -84,15 +84,25 @@ class ParallelMatcher
      */
     public function match($input)
     {
+        print "Input class: " . get_class($input) . "\n";
+        if ($input instanceof \XMLReader){
+            print "Matching XML!\n";
+        }
         $noMatch = true;
-        foreach ($this->matchers as $matcher) {
+        foreach ($this->matchers as $key => $matcher) {
             if ($matcher->noMatch()) {
                 continue;
             }
             if ($matcher->match($input)) {
+                if ($input instanceof \XMLReader){
+                    print "Matcher $key still alive\n";
+                }
                 $noMatch = false;
             }
             if ($matcher->matchFound()) {
+                if ($input instanceof \XMLReader){
+                    print "Match found for matcher $key\n";
+                }
                 $this->matched[] = $matcher->matched;
                 $this->resetMatchers();
                 break;
